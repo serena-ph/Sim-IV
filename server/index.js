@@ -18,6 +18,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", require('./api'))
 app.use("/auth", require("./auth"))
 
+app.use((req, res, next) => {
+    console.log("req headers", req.headers);
+    const auth = req.headers.authorization;
+    const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+  
+    try {
+      req.user = jwt.verify(token, process.env.JWT);
+    } catch {
+      req.user = null;
+    }
+  
+    next();
+  });
+  
 
 const server = app.listen(PORT, ()=>{
     console.log('On port'+PORT)
